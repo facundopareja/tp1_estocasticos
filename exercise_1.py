@@ -6,6 +6,8 @@ from utils import covariance_matrix, segment_signal, normalize_signal
 
 
 def graph_histogram_scatterplot(matrix, bins=50):
+    """ Grafica histograma para cada eje de la matriz que recibe
+    Tambien grafica dispersion entre ambos componentes."""
     plt.hist(x=matrix[0, :], bins=bins)
     plt.show()
     plt.hist(x=matrix[1, :], bins=bins)

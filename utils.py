@@ -3,6 +3,7 @@ import sounddevice as sd
 
 
 def segment_signal(signal, length):
+    """Segmenta señal de acuerdo a la longitud dada."""
     array_list = []
     for i in range(0, len(signal), length):
         array_list.append(signal[i:i + length])
@@ -10,37 +11,42 @@ def segment_signal(signal, length):
 
 
 def reconstruct_signal(signal, U, signal_rms):
+    """Reconstruye la señal."""
     signal = np.dot(U, signal)
     return (signal.reshape(-1, order='F')) * signal_rms
 
 
 def normalize_signal(signal, signal_rms):
+    """Normaliza la señal de acuerdo a RMS."""
     return np.apply_along_axis(lambda x: x / signal_rms, 0, signal)
 
 
-def calculate_mean(array, number_samples):
-    number_columns = len(array[1, :])
+def calculate_mean(vector, number_samples):
+    """Calcula esperanza del vector aleatorio."""
+    number_columns = len(vector[1, :])
     value_list = []
     for i in range(number_columns):
-        sum_i = np.sum(array[:, i])
+        sum_i = np.sum(vector[:, i])
         value_list.append(sum_i)
     return (1 / number_samples) * np.array(value_list)
 
 
-def covariance_matrix(array):
-    array_size = array.shape
+def covariance_matrix(vector):
+    """Calcular matriz de covarianza del vector aleatorio."""
+    array_size = vector.shape
     rows = array_size[0]
     columns = array_size[1]
-    mean = calculate_mean(array, rows)
+    mean = calculate_mean(vector, rows)
     matrix = np.zeros((columns, columns))
     for i in range(rows):
-        aux_array = array[i, :] - mean
+        aux_array = vector[i, :] - mean
         aux_matrix = np.outer(aux_array, aux_array)
         matrix += aux_matrix
     return (1 / rows) * matrix
 
 
 def pca_compression(X_m, compression_rate):
+    """Aplica compresion PCA con cierta tasa a la matriz dada."""
     covariance_x = covariance_matrix(X_m)
     sample_length = X_m.shape[1]
     eigenvalues, eigenvectors = np.linalg.eig(covariance_x)
@@ -53,6 +59,7 @@ def pca_compression(X_m, compression_rate):
 
 
 def calculate_mse(original_signal, reconstructed_signal):
+    """Calcula MSE de señal reconstruida respecto de la original."""
     mse = 0
     length = len(reconstructed_signal)
     for i in range(length):
@@ -61,11 +68,12 @@ def calculate_mse(original_signal, reconstructed_signal):
 
 
 def normalize_compress_decompress(audio, samplerate, sample_length, compress_rates, graph=False):
+    """Aplica normalizacion, compresion PCA y decompresion, segun los parametros especificados."""
     print(f"Reproduciendo audio original")
     sd.play(audio, samplerate)
     sd.wait()
     signal_rms = np.linalg.norm(audio)
-    audio = normalize_signal(audio)
+    audio = normalize_signal(audio, signal_rms)
     sample_number = int(len(audio) / sample_length)
     corrected_array = audio[np.arange(sample_length * sample_number)]
     X_m = segment_signal(corrected_array, sample_length)
