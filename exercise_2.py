@@ -1,5 +1,4 @@
 import soundfile as sf
-import sounddevice as sd
 
 from utils import normalize_compress_decompress
 

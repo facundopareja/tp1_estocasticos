@@ -1,9 +1,8 @@
 import soundfile as sf
-import sounddevice as sd
 import matplotlib.pyplot as plt
 import numpy as np
 
-from audio.utils import covariance_matrix, segment_signal, normalize_signal
+from utils import covariance_matrix, segment_signal, normalize_signal
 
 
 def graph_histogram_scatterplot(matrix, bins=50):

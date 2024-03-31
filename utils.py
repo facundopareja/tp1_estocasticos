@@ -1,6 +1,5 @@
 import numpy as np
 import sounddevice as sd
-import soundfile as sf
 
 
 def segment_signal(signal, length):
