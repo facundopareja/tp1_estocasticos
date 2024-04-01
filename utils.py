@@ -59,7 +59,7 @@ def pca_compression(X_m, compression_rate):
     return y_matrix, U
 
 
-def graph_mse_cr(original_signal, reconstructed_signals, compress_rates):
+def calculate_mse(original_signal, reconstructed_signals):
     """Calcula MSE de señal reconstruida respecto de la original."""
     mse_array = []
     for i in range(len(reconstructed_signals)):
@@ -67,20 +67,15 @@ def graph_mse_cr(original_signal, reconstructed_signals, compress_rates):
         mse = 0
         for j in range(len(original_signal)):
             mse += np.power((original_signal[j] - reconstructed_signal[j]), 2)
-        mse_array.append((mse/len(original_signal)))
-    print(mse_array)
-    plt.plot(list(map(lambda num: num * 100, compress_rates)), mse_array)
-    plt.title('MSE vs Compression Rate')
-    plt.xlabel('Compression Rate')
-    plt.ylabel('MSE')
-    plt.show()
+        mse_array.append((mse / len(original_signal)))
+    return mse_array
 
 
-def normalize_compress_decompress(audio, samplerate, sample_length, compress_rates, graph=False):
+def normalize_compress_decompress(audio, samplerate, sample_length, compress_rates, graph=None):
     """Aplica normalizacion, compresion PCA y decompresion, segun los parametros especificados."""
     print(f"Reproduciendo audio original")
-    #sd.play(audio, samplerate)
-    #sd.wait()
+    sd.play(audio, samplerate)
+    sd.wait()
     signal_rms = np.linalg.norm(audio)
     audio = normalize_signal(audio, signal_rms)
     sample_number = int(len(audio) / sample_length)
@@ -91,8 +86,9 @@ def normalize_compress_decompress(audio, samplerate, sample_length, compress_rat
         Y_m, U = pca_compression(X_m, compression_rate)
         reconstructed_signal = reconstruct_signal(Y_m, U)
         print(f"Reproduciendo audio con compresion {compression_rate * 100} %")
-        sd.play(reconstructed_signal*signal_rms, samplerate)
+        sd.play(reconstructed_signal * signal_rms, samplerate)
         sd.wait()
         reconstructed_signals.append(reconstructed_signal)
     if graph:
-        graph_mse_cr(corrected_array, reconstructed_signals, compress_rates)
+        graph(corrected_array, reconstructed_signals, compress_rates)
+    return calculate_mse(corrected_array, reconstructed_signals)
